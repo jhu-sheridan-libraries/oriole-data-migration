@@ -31,6 +31,8 @@ xmllint --noout data.xml
 ```
 ## Load data into Oriole
 
+Create `.env` file and configure the environment variables. Follow the example in `.env.example`.
+
 Simply run the following:
 
 ```
