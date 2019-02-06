@@ -37,7 +37,7 @@ for child in root:
         payload = {'id': jhu_id, 'title': title, 'url': url, 'publisher': publisher, 'creator': creator}
         db_data.append(payload)
 
-with open('data/publishers.csv', 'w', newline='') as csvfile:
+with open('output/publishers.csv', 'w', newline='') as csvfile:
     writer = csv.DictWriter(csvfile, ['id', 'title', 'url', 'publisher', 'creator'])
     writer.writeheader()
     for payload in db_data:
