@@ -41,10 +41,13 @@ for child in root:
     publisher_elem = child.find('publisher')
     publisher = publisher_elem.text if publisher_elem is not None else ''
 
+    creator_elem = child.find('creator')
+    creator = creator_elem.text if creator_elem is not None else ''
+
     if title == '' and url == '':
         print(f'ID {jhu_id}: no title and url.')
     else:
-        payload = {'id': id, 'title': title, 'url': url, 'description': description, 'jhuId': jhu_id, 'subjects': [], 'publisher': publisher}
+        payload = {'id': id, 'title': title, 'url': url, 'description': description, 'jhuId': jhu_id, 'subjects': [], 'publisher': publisher, 'creator': creator}
         db_map[jhu_id] = payload
 
 # Read fast terms
@@ -100,13 +103,16 @@ for metalib_id, payload in db_map.items():
 headers={'x-okapi-tenant': settings.ORIOLE_API_TENANT, 'content-type': 'application/json'}
 payload = {'username': settings.ORIOLE_API_USERNAME, 'password': settings.ORIOLE_API_PASSWORD}
 response = requests.post(f'{settings.ORIOLE_API_ROOT}/authn/login', data=json.dumps(payload), headers=headers)
-# print(response)
 headers['x-okapi-token'] = response.headers['x-okapi-token']
 
 api_url = f'{settings.ORIOLE_API_ROOT}/oriole-subjects'
 for fast_id, payload in terms_map.items():
     response = requests.post(api_url, headers=headers, data=json.dumps(payload))
+    if response.status_code != 201:
+        print(response.status_code, response.text)
 
 api_url = f'{settings.ORIOLE_API_ROOT}/oriole-resources'
 for metalib_id, payload in db_map.items():
     response = requests.post(api_url, headers=headers, data=json.dumps(payload))
+    if response.status_code != 201:
+        print(response.status_code, response.text)
