@@ -47,7 +47,7 @@ for child in root:
     if title == '' and url == '':
         print(f'ID {jhu_id}: no title and url.')
     else:
-        payload = {'id': id, 'title': title, 'url': url, 'description': description, 'jhuId': jhu_id, 'subjects': [], 'publisher': publisher, 'creator': creator}
+        payload = {'id': id, 'title': title, 'url': url, 'description': description, 'identifier': [{'value': jhu_id, 'type': 'JHUID'}], 'terms': [], 'publisher': publisher, 'creator': creator}
         db_map[jhu_id] = payload
 
 # Read fast terms
@@ -57,7 +57,7 @@ with open('data/fast_terms.txt', 'r') as terms_file:
     for row in csv.DictReader(terms_file, dialect='comma', fieldnames=['id', 'term', 'facet', 'uri']):
         id = str(uuid.uuid4())
         fast_id = row['id']
-        payload = {'id': id, 'fastId': fast_id, 'term': row['term'], 'uri': row['uri'], 'facet': row['facet'], 'core': []}
+        payload = {'id': id, 'fastId': fast_id, 'term': row['term'], 'uri': row['uri'], 'facet': row['facet']}
         terms_map[fast_id] = payload
 
 # Read access id to metalib id mapping
@@ -70,40 +70,23 @@ with open('data/oriole_dbs.txt', 'r', encoding='latin-1') as csvfile:
 term_cores = {} # term-core_db
 db_terms = {}  # database (metalib_id) - list of terms (fast_id)
 
-# build database to terms mapping
+# build database to terms mapping and add terms to databases
 with open('data/oriole_map_db_to_terms.txt', 'r', encoding='latin-1') as csvfile:
     for row in csv.DictReader(csvfile, fieldnames=['db', 'fastid', 'core']):
-        metalib_id = id_map[int(row['db'])]
+        metalib_id = id_map[int(row['db'])]  #Gets the JHUID
         fast_id = row['fastid']
-        if metalib_id in db_terms:
-            db_terms[metalib_id].append(fast_id)
-        else:
-            db_terms[metalib_id] = [fast_id]
+        # add term to database
+        subject = {'subject': terms_map[fast_id]}
+        subject['category'] = 'core' if row['core'] == '1' else 'none'
+        subject['score'] = 1
+        db_map[metalib_id]['terms'].append(subject)
 
-        if row['core'] == '1':
-            if fast_id in term_cores:
-                term_cores[fast_id].append(metalib_id)
-            else:
-                term_cores[fast_id] = [metalib_id]
-
-# add core to terms
-for fast_id, payload in terms_map.items():
-    if fast_id in term_cores:
-        for metalib_id in term_cores[fast_id]:
-            db_id = db_map[metalib_id]['id']
-            payload['core'].append(db_id)
-
-for metalib_id, payload in db_map.items():
-    if metalib_id in db_terms:
-        for fast_id in db_terms[metalib_id]:
-            term_id = terms_map[fast_id]['id']
-            # payload['subjects'].append(term_id)
-            payload['subjects'].append(terms_map[fast_id])
 
 headers={'x-okapi-tenant': settings.ORIOLE_API_TENANT, 'content-type': 'application/json'}
-payload = {'username': settings.ORIOLE_API_USERNAME, 'password': settings.ORIOLE_API_PASSWORD}
-response = requests.post(f'{settings.ORIOLE_API_ROOT}/authn/login', data=json.dumps(payload), headers=headers)
-headers['x-okapi-token'] = response.headers['x-okapi-token']
+if settings.OKAPI_ENABLED:
+    payload = {'username': settings.ORIOLE_API_USERNAME, 'password': settings.ORIOLE_API_PASSWORD}
+    response = requests.post(f'{settings.ORIOLE_API_ROOT}/authn/login', data=json.dumps(payload), headers=headers)
+    headers['x-okapi-token'] = response.headers['x-okapi-token']
 
 api_url = f'{settings.ORIOLE_API_ROOT}/oriole-subjects'
 for fast_id, payload in terms_map.items():
@@ -116,3 +99,4 @@ for metalib_id, payload in db_map.items():
     response = requests.post(api_url, headers=headers, data=json.dumps(payload))
     if response.status_code != 201:
         print(response.status_code, response.text)
+        print(payload)
