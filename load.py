@@ -47,7 +47,7 @@ for child in root:
     if title == '' and url == '':
         print(f'ID {jhu_id}: no title and url.')
     else:
-        payload = {'id': id, 'title': title, 'url': url, 'description': description, 'identifier': [{'value': jhu_id, 'type': 'JHUID'}], 'terms': [], 'publisher': publisher, 'creator': creator}
+        payload = {'id': id, 'title': title, 'url': url, 'description': description, 'identifier': [{'value': jhu_id, 'type': 'JHUID'}], 'terms': [], 'publisher': publisher, 'creator': creator, 'tags': { 'tagList': [] }}
         db_map[jhu_id] = payload
 
 # Read fast terms
@@ -77,10 +77,20 @@ with open('data/oriole_map_db_to_terms.txt', 'r', encoding='latin-1') as csvfile
         fast_id = row['fastid']
         # add term to database
         subject = {'subject': terms_map[fast_id]}
-        subject['category'] = 'core' if row['core'] == '1' else 'none'
+        # subject['category'] = 'core' if row['core'] == '1' else 'none'
         subject['score'] = 1
-        db_map[metalib_id]['terms'].append(subject)
+        if metalib_id in db_map:
+            db_map[metalib_id]['terms'].append(subject)
+        else:
+            print(f'metalib_id in fast term mapping not found: {row["db"]}, {metalib_id}')
 
+# Read tags
+terms_map = {}
+with open('data/xerxes_tags.csv', 'r') as tags_file:
+    for row in csv.DictReader(tags_file, dialect='comma'):
+        metalib_id = row['database_id']
+        if metalib_id in db_map:
+            db_map[metalib_id]['tags']['tagList'].append(row['catname'] + ' -- ' + row['subname'])
 
 headers={'x-okapi-tenant': settings.ORIOLE_API_TENANT, 'content-type': 'application/json'}
 if settings.OKAPI_ENABLED:
