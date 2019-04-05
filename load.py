@@ -47,7 +47,7 @@ for child in root:
     if title == '' and url == '':
         print(f'ID {jhu_id}: no title and url.')
     else:
-        payload = {'id': id, 'title': title, 'url': url, 'description': description, 'identifier': [{'value': jhu_id, 'type': 'JHUID'}], 'terms': [], 'publisher': publisher, 'creator': creator, 'tags': { 'tagList': [] }}
+        payload = {'id': id, 'title': title, 'url': url, 'description': description, 'altId': jhu_id, 'terms': [], 'publisher': publisher, 'creator': creator, 'tags': { 'tagList': [] }}
         db_map[jhu_id] = payload
 
 # Read fast terms
@@ -64,8 +64,8 @@ with open('data/fast_terms.txt', 'r') as terms_file:
 csv.register_dialect('piper', delimiter='|', quoting=csv.QUOTE_ALL)
 id_map = {}  # access db ID to metalib id map
 with open('data/oriole_dbs.txt', 'r', encoding='latin-1') as csvfile:
-    for row in csv.DictReader(csvfile, dialect='piper'):
-        id_map[int(row['ID'])] = row['metalib_id']
+    for row in csv.DictReader(csvfile, dialect='comma', fieldnames=['id', 'metalib_id', 'title', 'description', 'note']):
+            id_map[int(row['id'])] = row['metalib_id']
 
 term_cores = {} # term-core_db
 db_terms = {}  # database (metalib_id) - list of terms (fast_id)
@@ -104,7 +104,7 @@ for fast_id, payload in terms_map.items():
     if response.status_code != 201:
         print(response.status_code, response.text)
 
-api_url = f'{settings.ORIOLE_API_ROOT}/oriole-resources'
+api_url = f'{settings.ORIOLE_API_ROOT}/oriole/resources'
 for metalib_id, payload in db_map.items():
     response = requests.post(api_url, headers=headers, data=json.dumps(payload))
     if response.status_code != 201:
