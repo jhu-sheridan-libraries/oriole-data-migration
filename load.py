@@ -21,6 +21,7 @@ root = tree.getroot()
 
 # Read DB data
 db_map = {}
+total_in_file = 0
 
 for child in root:
     id = str(uuid.uuid4())
@@ -44,11 +45,38 @@ for child in root:
     creator_elem = child.find('creator')
     creator = creator_elem.text if creator_elem is not None else ''
 
+    coverage_elem = child.find('coverage')
+    coverage = coverage_elem.text if coverage_elem is not None else ''
+
+    search_hints_elem = child.find('search_hints')
+    search_hints = search_hints_elem.text if search_hints_elem is not None else ''
+
+    alt_title_elems = child.findall('title_alternate')
+    alt_titles = []
+    if alt_title_elems is not None:
+        for alt_title_elem in alt_title_elems:
+            alt_titles.append(alt_title_elem.text)
+    payload = {}
+
     if title == '' and url == '':
         print(f'ID {jhu_id}: no title and url.')
     else:
-        payload = {'id': id, 'title': title, 'url': url, 'description': description, 'altId': jhu_id, 'terms': [], 'publisher': publisher, 'creator': creator, 'tags': { 'tagList': [] }}
+        payload = {
+            'id': id,
+            'title': title,
+            'url': url,
+            'description': description,
+            'altId': jhu_id,
+            'terms': [],
+            'publisher': publisher,
+            'creator': creator,
+            'tags': { 'tagList': [] },
+            'coverage': coverage,
+            'searchHints': search_hints,
+            'altTitles': alt_titles
+        }
         db_map[jhu_id] = payload
+    total_in_file += 1
 
 # Read fast terms
 csv.register_dialect('comma', delimiter=',', quoting=csv.QUOTE_ALL)
@@ -95,18 +123,18 @@ with open('data/xerxes_tags.csv', 'r') as tags_file:
 headers={'x-okapi-tenant': settings.ORIOLE_API_TENANT, 'content-type': 'application/json'}
 if settings.OKAPI_ENABLED:
     payload = {'username': settings.ORIOLE_API_USERNAME, 'password': settings.ORIOLE_API_PASSWORD}
-    response = requests.post(f'{settings.ORIOLE_API_ROOT}/authn/login', data=json.dumps(payload), headers=headers)
-    headers['x-okapi-token'] = response.headers['x-okapi-token']
+    response = requests.post(f'{settings.ORIOLE_API_ROOT}/authn/login', data=json.dumps(payload), headers=headers, verify=False)
+    headers['x-okapi-token'] = response.headers['x-okapi-token'] # 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNlcl9pZCI6IjI2OWM4MzU5LTliMTYtNDRlYi05Y2VmLWFjYzkxNTYxOTk2NCIsImNhY2hlX2tleSI6ImMwZmNmOTE3LTU4MGQtNDg2Mi04ODJhLWU4YTE2ZmVlNjVhNyIsImlhdCI6MTU1NjE1NjQ1MiwidGVuYW50IjoiZGlrdSJ9.jSvPFcoj-TZhZEd_Yxl0JETOjfhZPrEx5cTQAOToFAE' #
 
 api_url = f'{settings.ORIOLE_API_ROOT}/oriole-subjects'
 for fast_id, payload in terms_map.items():
-    response = requests.post(api_url, headers=headers, data=json.dumps(payload))
+    response = requests.post(api_url, headers=headers, data=json.dumps(payload), verify=False)
     if response.status_code != 201:
         print(response.status_code, response.text)
 
 api_url = f'{settings.ORIOLE_API_ROOT}/oriole/resources'
 for metalib_id, payload in db_map.items():
-    response = requests.post(api_url, headers=headers, data=json.dumps(payload))
+    response = requests.post(api_url, headers=headers, data=json.dumps(payload), verify=False)
     if response.status_code != 201:
         print(response.status_code, response.text)
         print(payload)
