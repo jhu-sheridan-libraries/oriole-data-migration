@@ -1,3 +1,5 @@
 .env
 output/*.txt
 output/*.csv
+
+.idea
