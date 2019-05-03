@@ -6,7 +6,7 @@
 
 # Usage:
 # In the /data directory, run
-# ../scripts/load.py
+# ../load.py
 
 import xml.etree.ElementTree as ET
 import requests
@@ -124,7 +124,7 @@ headers={'x-okapi-tenant': settings.ORIOLE_API_TENANT, 'content-type': 'applicat
 if settings.OKAPI_ENABLED:
     payload = {'username': settings.ORIOLE_API_USERNAME, 'password': settings.ORIOLE_API_PASSWORD}
     response = requests.post(f'{settings.ORIOLE_API_ROOT}/authn/login', data=json.dumps(payload), headers=headers, verify=False)
-    headers['x-okapi-token'] = response.headers['x-okapi-token'] 
+    headers['x-okapi-token'] = response.headers['x-okapi-token']
 
 api_url = f'{settings.ORIOLE_API_ROOT}/oriole-subjects'
 for fast_id, payload in terms_map.items():
