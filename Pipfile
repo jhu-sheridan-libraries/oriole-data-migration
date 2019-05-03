@@ -8,6 +8,7 @@ requests = "*"
 uuid = "*"
 python-dotenv = "*"
 urllib3 = "*"
+zeep = "*"
 
 [dev-packages]
 
