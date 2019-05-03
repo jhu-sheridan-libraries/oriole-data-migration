@@ -124,7 +124,7 @@ headers={'x-okapi-tenant': settings.ORIOLE_API_TENANT, 'content-type': 'applicat
 if settings.OKAPI_ENABLED:
     payload = {'username': settings.ORIOLE_API_USERNAME, 'password': settings.ORIOLE_API_PASSWORD}
     response = requests.post(f'{settings.ORIOLE_API_ROOT}/authn/login', data=json.dumps(payload), headers=headers, verify=False)
-    headers['x-okapi-token'] = response.headers['x-okapi-token'] # 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNlcl9pZCI6IjI2OWM4MzU5LTliMTYtNDRlYi05Y2VmLWFjYzkxNTYxOTk2NCIsImNhY2hlX2tleSI6ImMwZmNmOTE3LTU4MGQtNDg2Mi04ODJhLWU4YTE2ZmVlNjVhNyIsImlhdCI6MTU1NjE1NjQ1MiwidGVuYW50IjoiZGlrdSJ9.jSvPFcoj-TZhZEd_Yxl0JETOjfhZPrEx5cTQAOToFAE' #
+    headers['x-okapi-token'] = response.headers['x-okapi-token'] 
 
 api_url = f'{settings.ORIOLE_API_ROOT}/oriole-subjects'
 for fast_id, payload in terms_map.items():
