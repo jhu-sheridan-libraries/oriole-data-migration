@@ -14,7 +14,7 @@ pipenv install
 
 Xerces data are stored in MySQL in XML format. To extract the data, run the following:
 
-Export data from MySQL:
+Export data from MySQL:2yeR6cSdy3
 
 ```
 mysql --user=xerxes --password -h mysql.mse.jhu.edu -e "SELECT data from xerxes.xerxes_databases;" > data.txt
