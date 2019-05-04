@@ -5,8 +5,8 @@
 # via the REST interface.
 
 # Usage:
-# In the /data directory, run
-# ../load.py
+# In the oriole-data-migration directory, run
+# pipenv run python ./load.py
 
 import xml.etree.ElementTree as ET
 import requests
@@ -120,11 +120,7 @@ with open('data/xerxes_tags.csv', 'r') as tags_file:
         if metalib_id in db_map:
             db_map[metalib_id]['tags']['tagList'].append(row['catname'] + ' -- ' + row['subname'])
 
-headers={'x-okapi-tenant': settings.ORIOLE_API_TENANT, 'content-type': 'application/json'}
-if settings.OKAPI_ENABLED:
-    payload = {'username': settings.ORIOLE_API_USERNAME, 'password': settings.ORIOLE_API_PASSWORD}
-    response = requests.post(f'{settings.ORIOLE_API_ROOT}/authn/login', data=json.dumps(payload), headers=headers, verify=False)
-    headers['x-okapi-token'] = response.headers['x-okapi-token']
+headers = settings.build_headers()
 
 api_url = f'{settings.ORIOLE_API_ROOT}/oriole-subjects'
 for fast_id, payload in terms_map.items():
