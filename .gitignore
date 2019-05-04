@@ -4,3 +4,4 @@ output/*.csv
 
 .idea
 data/*.pickle
+data/licenses.txt
