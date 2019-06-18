@@ -36,6 +36,4 @@ for jhu_id in lines:
     response = requests.request("PUT", put_url, headers=headers, data=json.dumps(record), verify=False)
     if response.status_code != 200:
         print(f"[PUT request failed]: {response.text}, {jhu_id}")
-    # if not record['tags']['tagList']:
-    #     print(record)
 
