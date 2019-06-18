@@ -38,24 +38,30 @@ for child in root:
 
     description_elem = child.find('description')
     description = description_elem.text if description_elem is not None else ''
-
+    
     publisher_elem = child.find('publisher')
     publisher = publisher_elem.text if publisher_elem is not None else ''
 
     creator_elem = child.find('creator')
     creator = creator_elem.text if creator_elem is not None else ''
 
-    coverage_elem = child.find('coverage')
-    coverage = coverage_elem.text if coverage_elem is not None else ''
-
-    search_hints_elem = child.find('search_hints')
-    search_hints = search_hints_elem.text if search_hints_elem is not None else ''
+    proxy_elem = child.find('proxy')
+    proxy = True if proxy_elem is not None and proxy_elem.text == '1' else False
 
     alt_title_elems = child.findall('title_alternate')
     alt_titles = []
     if alt_title_elems is not None:
         for alt_title_elem in alt_title_elems:
             alt_titles.append(alt_title_elem.text)
+
+    group_restriction_elems = child.findall('group_restriction')
+    availability = [elem.text for elem in group_restriction_elems]
+
+    access_restrictions = []
+    coverage_elem = child.find('coverage')
+    if coverage_elem is not None:
+        access_restrictions.append({'type': 'concurrent_users', 'content': coverage_elem.text, 'private': False})
+
     payload = {}
 
     if title == '' and url == '':
@@ -71,9 +77,10 @@ for child in root:
             'publisher': publisher,
             'creator': creator,
             'tags': { 'tagList': [] },
-            'coverage': coverage,
-            'searchHints': search_hints,
-            'altTitles': alt_titles
+            'altTitle': ' '.join(alt_titles),
+            'accessRestrictions': access_restrictions,
+            'proxy': proxy,
+            'availability': availability
         }
         db_map[jhu_id] = payload
     total_in_file += 1
