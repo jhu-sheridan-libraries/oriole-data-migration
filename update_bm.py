@@ -22,7 +22,7 @@ for jhu_id in lines:
     query_string = {"query": f"altId=={jhu_id}"}
     response = requests.request("GET", url, headers=headers, params=query_string, verify=False)
     if response.status_code != 200:
-        print(f"[request failed]: {response.text}")
+        print(f"[GET request failed]: {response.text}, {jhu_id}")
         continue
     data = response.json()
     if data['resultInfo']['totalRecords'] != 1:
@@ -33,9 +33,9 @@ for jhu_id in lines:
         bisect.insort(record['tags']['tagList'], 'Biomedical Sciences – Core Databases')
     # Post record
     put_url = f"{url}/{record['id']}"
-    print(put_url)
     response = requests.request("PUT", put_url, headers=headers, data=json.dumps(record), verify=False)
-    print(response.status_code)
+    if response.status_code != 200:
+        print(f"[PUT request failed]: {response.text}, {jhu_id}")
     # if not record['tags']['tagList']:
     #     print(record)
 
