@@ -29,11 +29,13 @@ for jhu_id in lines:
         print(f"[request error]: found {data['resultInfo']['totalRecords']} instead of 1. {jhu_id}")
         continue
     record = data['resources'][0]
-    if 'Biomedical Sciences – Core Databases' not in record['tags']['tagList']:
-        bisect.insort(record['tags']['tagList'], 'Biomedical Sciences – Core Databases')
+    if 'Biomedical Sciences – Core Databases' in record['tags']['tagList']:
+        record['tags']['tagList'].remove('Biomedical Sciences – Core Databases')
+    if 'Biomedical Sciences -- Core Databases' not in record['tags']['tagList']:
+        bisect.insort(record['tags']['tagList'], 'Biomedical Sciences -- Core Databases')
     # Post record
     put_url = f"{url}/{record['id']}"
     response = requests.request("PUT", put_url, headers=headers, data=json.dumps(record), verify=False)
-    if response.status_code != 200:
+    if response.status_code != 204:
         print(f"[PUT request failed]: {response.text}, {jhu_id}")
 
