@@ -18,10 +18,11 @@ SS_PASSWORD = os.getenv('SERIAL_SOLUTIONS_PASSWORD')
 SS_WSDL = os.getenv('SERIAL_SOLUTIONS_WSDL')
 SS_LIBRARY_CODE = os.getenv('SERIAL_SOLUTIONS_LIBRARY_CODE')
 
+
 def build_headers():
-    headers={'x-okapi-tenant': ORIOLE_API_TENANT, 'content-type': 'application/json'}
+    headers = {'x-okapi-tenant': ORIOLE_API_TENANT, 'content-type': 'application/json'}
     if OKAPI_ENABLED:
         payload = {'username': ORIOLE_API_USERNAME, 'password': ORIOLE_API_PASSWORD}
         response = requests.post(f'{ORIOLE_API_ROOT}/authn/login', data=json.dumps(payload), headers=headers, verify=False)
-        headers['x-okapi-token'] = response.headers['x-okapi-token']
+        headers['Authorization'] = f"Bearer {response.headers['x-okapi-token']}"
     return headers
