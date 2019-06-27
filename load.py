@@ -111,7 +111,7 @@ with open('data/oriole_map_db_to_terms.txt', 'r', encoding='latin-1') as csvfile
         metalib_id = id_map[int(row['db'])]  #Gets the JHUID
         fast_id = row['fastid']
         # add term to database
-        subject = {'subject': terms_map[fast_id]}
+        subject = dict({'subject': terms_map[fast_id]})
         # subject['category'] = 'core' if row['core'] == '1' else 'none'
         subject['score'] = 1
         if metalib_id in db_map:
