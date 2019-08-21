@@ -10,6 +10,8 @@ pipenv is used to manage python packages. Install it first and them install the 
 pipenv install
 ```
 
+Xlint is used to check the XML format. 
+
 ## Extract data from Xerces MySQL
 
 Xerces data are stored in MySQL in XML format. To extract the data, run the following:
