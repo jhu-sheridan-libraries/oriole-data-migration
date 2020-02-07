@@ -22,6 +22,10 @@ Export data from MySQL:2yeR6cSdy3
 mysql --user=xerxes --password -h mysql.mse.jhu.edu -e "SELECT data from xerxes.xerxes_databases;" > data.txt
 ```
 
+```
+mysql --user=xerxes --password -h mysql.mse.jhu.edu -e "SELECT subcat_2_db.database_id as database_id, cat.name AS catname, subcat.name AS subname FROM xerxes.xerxes_user_categories cat INNER JOIN xerxes.xerxes_user_subcategories subcat ON cat.id = subcat.category_id INNER JOIN xerxes.xerxes_user_subcategory_databases subcat_2_db ON subcat.id = subcat_2_db.subcategory_id WHERE cat.published = TRUE ORDER BY 2, 3, 1" > data/xerxes_tags.csv
+```
+
 Make it an XML and clean up
 ```
 cat data.txt | tail -n +2 | sed 's/^<\?xml.*\?>\\n//' | sed 's/\&\#xD;//g' | sed 's/\\n//g' | sed 's/<!--[^>]*-->//g' | sed '1s/^/<?xml version="1.0"?><databases>/' | sed '$s/$/<\/databases>/'  > data.xml
